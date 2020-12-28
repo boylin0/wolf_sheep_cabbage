@@ -8,16 +8,7 @@ from GObject.Wolf import Wolf
 from GObject.Cabbage import Cabbage
 from GObject.Boat import Boat
 from GObject.Person import Person
-
-# Set Window Position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
-
-# Start Game Window
-pg.init()
-width = 1024
-height = 768
-screen = pg.display.set_mode((width, height))
-pg.display.set_caption('Wolf & Sheep & Cabbage')
+from GObject.UIObject import UIObject
 
 
 class Game:
@@ -28,6 +19,9 @@ class Game:
         self.font = pg.font.Font(None, 20)
 
         self.done = False
+        self.reset = False
+        self.gameover = False
+        self.complete = False
 
         self.background = pg.image.load('media/background.png')
         self.background = pg.transform.scale(
@@ -61,12 +55,37 @@ class Game:
 
         self.person = Person(300, 300)
 
+        self.btn_reset = UIObject('media/ui/button_reset.png', 0.5, 0, 0)
+        self.btn_reset.setPos(
+            (width - self.btn_reset.width - 10, 10))
+
+        self.btn_test = UIObject('media/ui/button_empty.png', 0.5, 0, 0)
+        self.btn_test.setPos(
+            (self.btn_reset.x - self.btn_test.width - 10, 10))
+
+        self.ui_gameover = UIObject('media/ui/ui_gameover.png', 0.4, 0, 0)
+        self.ui_gameover.setPos(
+            (width / 2 - self.ui_gameover.width / 2, height / 3 - self.ui_gameover.height / 2))
+
+        self.ui_complete = UIObject('media/ui/ui_complete.png', 0.7, 0, 0)
+        self.ui_complete.setPos(
+            (width / 2 - self.ui_complete.width / 2, height / 3 - self.ui_complete.height / 2))
+
+        self.btn_replay = UIObject('media/ui/ui_replay.png', 0.22, 0, 0)
+        self.btn_replay.setPos(
+            (width / 2 - self.btn_replay.width / 2, self.ui_gameover.rect.bottom + 40))
+
     def run(self):
-        while not self.done:
+        while True:
             self.handle_events()
+            self.run_update()
             self.run_logic()
             self.draw()
             self.clock.tick(self.fps)
+            if self.reset:
+                return False
+            if self.done:
+                return True
 
     def handle_events(self):
         for event in pg.event.get():
@@ -74,81 +93,115 @@ class Game:
                 self.done = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    Click_Object = None
-                    # Click Object (Order by priority)
-                    if self.cabbage.wasClicked(event):
-                        Click_Object = self.cabbage
-                    if self.wolf.wasClicked(event):
-                        Click_Object = self.wolf
-                    if self.sheep.wasClicked(event):
-                        Click_Object = self.sheep
-                    if self.boat.wasClicked(event):
-                        Click_Object = self.boat
 
-                    if Click_Object == self.boat and self.boat.isMoving == False:
-                        print('Click On Boat')
-                        if self.boat.Crossed == False:
-                            self.boat.move((300, 0))
-                            self.boat.Crossed = True
-                        else:
-                            self.boat.move((-300, 0))
-                            self.boat.Crossed = False
+                    # UI Events
+                    if self.btn_reset.wasClicked(event):
+                        self.reset = True
 
-                    if self.boat.isMoving == False:
-                        if (Click_Object == self.sheep
-                        or Click_Object == self.cabbage
-                        or Click_Object == self.wolf):
+                    if self.btn_test.wasClicked(event):
+                        print('this is a test button')
+                        self.boat.move((300, 0))
+                        self.boat.Crossed = True
+                        self.Crossed = [self.sheep, self.wolf, self.cabbage]
+                        self.NotCrossed = set()
 
-                            print('Click On {0}'.format(
-                                Click_Object.__class__.__name__))
+                    if self.btn_replay.wasClicked(event) and self.gameover == True or self.complete == True:
+                        self.reset = True
 
-                            if self.boat.Carrying == Click_Object:
-                                # Unload An Object to Crossed Side
-                                if self.boat.Crossed == True:
-                                    self.Crossed.add(Click_Object)
-                                    Click_Object.absMove((self.boat.rect.right + 10,
-                                                        height - Click_Object.height - 100))
+                    # Object Events
+                    if self.gameover == False and self.complete == False:
+                        Click_Object = None
+                        # Determine Clicked Object (Order by priority)
+                        if self.cabbage.wasClicked(event):
+                            Click_Object = self.cabbage
+                        if self.wolf.wasClicked(event):
+                            Click_Object = self.wolf
+                        if self.sheep.wasClicked(event):
+                            Click_Object = self.sheep
+                        if self.boat.wasClicked(event):
+                            Click_Object = self.boat
 
-                                # Unload An Object to Not Crossed Side
-                                if self.boat.Crossed == False:
-                                    Click_Object.absMove((self.boat.x - (70 * len(self.NotCrossed)) - 25,
-                                                        height - Click_Object.height - 100))
-                                    self.NotCrossed.add(Click_Object)
+                        # Handle Boat Event
+                        if Click_Object == self.boat and self.boat.isMoving == False:
+                            print('Click On Boat')
+                            if self.boat.Crossed == False:
+                                self.boat.move((300, 0))
+                                self.boat.Crossed = True
+                            else:
+                                self.boat.move((-300, 0))
+                                self.boat.Crossed = False
 
-                                # Unload Object On The Boat
-                                self.boat.Carrying = None
+                        if self.boat.isMoving == False:
+                            if (Click_Object == self.sheep
+                                or Click_Object == self.cabbage
+                                    or Click_Object == self.wolf):
 
-                            elif self.boat.Carrying == None:
+                                print('Click On {0}'.format(
+                                    Click_Object.__class__.__name__))
 
-                                # Carry A Not Crossed Object
-                                if Click_Object in self.NotCrossed and self.boat.Crossed == False:
-                                    Click_Object.absMove(
-                                        (self.boat.x + self.boat.width - Click_Object.width - 10,
-                                        self.boat.rect.bottom - Click_Object.height - 30))
-                                    self.boat.Carrying = Click_Object
-                                    self.NotCrossed.remove(Click_Object)
+                                if self.boat.Carrying == Click_Object:
+                                    # Unload An Object to Crossed Side
+                                    if self.boat.Crossed == True:
+                                        self.Crossed.add(Click_Object)
+                                        Click_Object.absMove((self.boat.rect.right + 10,
+                                                              height - Click_Object.height - 100))
 
-                                # Carry A Crossed Object
-                                if Click_Object in self.Crossed and self.boat.Crossed == True:
-                                    Click_Object.absMove(
-                                        (self.boat.x + self.boat.width - Click_Object.width - 10,
-                                        self.boat.rect.bottom - Click_Object.height - 30))
-                                    self.boat.Carrying = Click_Object
-                                    self.Crossed.remove(Click_Object)
+                                    # Unload An Object to Not Crossed Side
+                                    if self.boat.Crossed == False:
+                                        Click_Object.absMove((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+                                                              height - Click_Object.height - 100))
+                                        self.NotCrossed.add(Click_Object)
 
-    def run_logic(self):
+                                    # Unload Object On The Boat
+                                    self.boat.Carrying = None
+
+                                elif self.boat.Carrying == None:
+
+                                    # Carry A Not Crossed Object
+                                    if Click_Object in self.NotCrossed and self.boat.Crossed == False:
+                                        Click_Object.absMove(
+                                            (self.boat.x + self.boat.width - Click_Object.width - 10,
+                                             self.boat.rect.bottom - Click_Object.height - 30))
+                                        self.boat.Carrying = Click_Object
+                                        self.NotCrossed.remove(Click_Object)
+
+                                    # Carry A Crossed Object
+                                    if Click_Object in self.Crossed and self.boat.Crossed == True:
+                                        Click_Object.absMove(
+                                            (self.boat.x + self.boat.width - Click_Object.width - 10,
+                                             self.boat.rect.bottom - Click_Object.height - 30))
+                                        self.boat.Carrying = Click_Object
+                                        self.Crossed.remove(Click_Object)
+
+    def run_update(self):
         self.person.setPos(
-            (self.boat.x + 20, self.boat.rect.bottom - self.person.height - 10))
+            (self.boat.x + 10, self.boat.rect.bottom - self.person.height - 10))
         self.boat.update()
         self.sheep.update()
         self.wolf.update()
         self.cabbage.update()
+        self.person.update()
+
         for index, item in enumerate(self.NotCrossed):
             item.absMove((300 - (70 * (index + 1)) - 25,
                           height - self.ground.get_height() - item.height))
         for index, item in enumerate(self.Crossed):
             item.absMove((width - 300 + (70 * (index + 1)) - 25,
                           height - self.ground.get_height() - item.height))
+
+    def run_logic(self):
+        # Determine Complete
+        if self.sheep in self.Crossed and self.wolf in self.Crossed and self.cabbage in self.Crossed:
+            self.complete = True
+
+        # Determine GameOver
+        if self.boat.isMoving:
+            if not self.NotCrossed == set():
+                for Side in [self.NotCrossed, self.Crossed]:
+                    if self.sheep in Side and self.cabbage in Side:
+                        self.gameover = True
+                    if self.wolf in Side and self.sheep in Side:
+                        self.gameover = True
 
     def draw(self):
         # Fill Background
@@ -157,9 +210,9 @@ class Game:
         pg.draw.rect(self.ground, (30, 160, 255),
                      (300, 0, 445, self.ground.get_height()), 0)
         screen.blit(self.ground, (0, height - self.ground.get_height()))
+
         # Draw title
-        head_font = pg.font.SysFont(None, 16)
-        text_surface = head_font.render(
+        text_surface = self.font.render(
             'wolf & sheep & cabbage [FPS: {0:.2f}]'.format(self.clock.get_fps()), True, (0, 0, 0))
         screen.blit(text_surface, (10, 10))
 
@@ -173,11 +226,21 @@ NotCrossed:{2}\n
             self.boat.Carrying,
             self.Crossed,
             self.NotCrossed)
+
         for txt_index, txt in enumerate(Info.split('\n')):
-            text_surface = head_font.render(
+            text_surface = self.font.render(
                 txt, True, (0, 0, 0))
             screen.blit(text_surface, (10, 23 + (7 * txt_index)))
-
+        # Draw GameOver
+        if self.gameover:
+            screen.blit(self.ui_gameover.image, self.ui_gameover.rect)
+            screen.blit(self.btn_replay.image, self.btn_replay.rect)
+        elif self.complete:
+            screen.blit(self.ui_complete.image, self.ui_complete.rect)
+            screen.blit(self.btn_replay.image, self.btn_replay.rect)
+        # Draw Button
+        screen.blit(self.btn_reset.image, self.btn_reset.rect)
+        screen.blit(self.btn_test.image, self.btn_test.rect)
         # Draw Sheep
         screen.blit(self.sheep.image, self.sheep.rect)
         # Draw Wolf
@@ -192,6 +255,22 @@ NotCrossed:{2}\n
 
 
 if __name__ == "__main__":
-    Game().run()
+
+    # Set Window Position
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
+
+    # Start Game Window
+    pg.init()
+    width = 1024
+    height = 768
+    screen = pg.display.set_mode((width, height))
+    pg.display.set_caption('Wolf & Sheep & Cabbage')
+    reRun = True
+    while reRun:
+        if not Game().run():
+            reRun = True
+        else:
+            reRun = False
+
     pg.quit()
     sys.exit()

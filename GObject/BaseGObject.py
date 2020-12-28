@@ -54,9 +54,9 @@ class BaseGObject:
         self._target_pos_y = move[1]
 
     def update(self):
-        move_delta_x = 0
-        move_delta_y = 0
 
+
+        # Animation Images
         if pg.time.get_ticks() - self._lastAnimationChanged > self._animatedList[self._animatedIndex % len(
                 self._animatedList)]['duration']:
             self._animatedIndex += 1
@@ -64,6 +64,9 @@ class BaseGObject:
                 self._animatedList)]['image']
             self._lastAnimationChanged = pg.time.get_ticks()
 
+        # Animation Moving
+        move_delta_x = 0
+        move_delta_y = 0
         if self.isMoving == True:
 
             if self._target_pos_x > self.x:
@@ -84,6 +87,7 @@ class BaseGObject:
                     clamp((self.y - self._target_pos_y) *
                           0.1, -self.maxSpeed, self.maxSpeed)
 
+        # Moving Done
         if abs(move_delta_x) < 0.08 and abs(move_delta_y) < 0.08:
             self.isMoving = False
             self.x = self._target_pos_x
