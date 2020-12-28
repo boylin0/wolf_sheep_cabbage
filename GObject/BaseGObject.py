@@ -17,10 +17,10 @@ class BaseGObject:
 
         for frame in animatedList:
             self._animatedList.append({
-                    'image': pg.transform.scale(pg.image.load(frame['path']), (self.width, self.height)).convert_alpha(),
-                    'duration': frame['duration']
+                'image': pg.transform.scale(pg.image.load(frame['path']), (self.width, self.height)).convert_alpha(),
+                'duration': frame['duration']
             })
-        
+
         self._animatedIndex = 0
         self._lastAnimationChanged = pg.time.get_ticks()
         self.image = self._animatedList[self._animatedIndex]['image']
@@ -34,6 +34,15 @@ class BaseGObject:
                             self.image.get_height())
         self.maxSpeed = 3
         self.isMoving = False
+
+
+    def setMaxSpeed(self, val):
+        self.maxSpeed = val
+
+    def setFlip(self, xbool, ybool):
+        for img in self._animatedList:
+            img['image'] = pg.transform.flip(img['image'], xbool, ybool)
+
 
     def setPos(self, pos):
         self.x = pos[0]
@@ -54,7 +63,6 @@ class BaseGObject:
         self._target_pos_y = move[1]
 
     def update(self):
-
 
         # Animation Images
         if pg.time.get_ticks() - self._lastAnimationChanged > self._animatedList[self._animatedIndex % len(
@@ -87,6 +95,7 @@ class BaseGObject:
                     clamp((self.y - self._target_pos_y) *
                           0.1, -self.maxSpeed, self.maxSpeed)
 
+   
         # Moving Done
         if abs(move_delta_x) < 0.08 and abs(move_delta_y) < 0.08:
             self.isMoving = False

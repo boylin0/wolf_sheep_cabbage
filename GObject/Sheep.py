@@ -49,4 +49,5 @@ class Sheep(BaseGObject):
         ]
 
 
-        super(Sheep, self).__init__(animated, 0.13, x, y)
+        super(Sheep, self).__init__(animated, 0.125, x, y)
+        self.setMaxSpeed(10)

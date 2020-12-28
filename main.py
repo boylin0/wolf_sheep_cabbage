@@ -40,17 +40,17 @@ class Game:
 
         self.sheep = Sheep(0, 0)
         self.NotCrossed.add(self.sheep)
-        self.sheep.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+        self.sheep.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25 - 300,
                            height - self.sheep.height - 100))
 
         self.cabbage = Cabbage(0, 0)
         self.NotCrossed.add(self.cabbage)
-        self.cabbage.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+        self.cabbage.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25 - 300,
                              height - self.cabbage.height - 100))
 
         self.wolf = Wolf(0, 0)
         self.NotCrossed.add(self.wolf)
-        self.wolf.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+        self.wolf.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25 - 300,
                           height - self.wolf.height - 100))
 
         self.person = Person(300, 300)
@@ -67,7 +67,7 @@ class Game:
         self.ui_gameover.setPos(
             (width / 2 - self.ui_gameover.width / 2, height / 3 - self.ui_gameover.height / 2))
 
-        self.ui_complete = UIObject('media/ui/ui_complete.png', 0.7, 0, 0)
+        self.ui_complete = UIObject('media/ui/ui_complete.png', 0.9, 0, 0)
         self.ui_complete.setPos(
             (width / 2 - self.ui_complete.width / 2, height / 3 - self.ui_complete.height / 2))
 
@@ -100,13 +100,14 @@ class Game:
 
                     if self.btn_test.wasClicked(event):
                         print('this is a test button')
-                        self.boat.move((300, 0))
+                        self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
                         self.boat.Crossed = True
                         self.Crossed = [self.sheep, self.wolf, self.cabbage]
                         self.NotCrossed = set()
 
-                    if self.btn_replay.wasClicked(event) and self.gameover == True or self.complete == True:
-                        self.reset = True
+                    if self.gameover == True or self.complete == True:
+                        if self.btn_replay.wasClicked(event):
+                            self.reset = True
 
                     # Object Events
                     if self.gameover == False and self.complete == False:
@@ -125,11 +126,14 @@ class Game:
                         if Click_Object == self.boat and self.boat.isMoving == False:
                             print('Click On Boat')
                             if self.boat.Crossed == False:
-                                self.boat.move((300, 0))
+                                self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
                                 self.boat.Crossed = True
+                                
                             else:
-                                self.boat.move((-300, 0))
+                                self.boat.absMove((300, self.boat.y))
                                 self.boat.Crossed = False
+                                
+
 
                         if self.boat.isMoving == False:
                             if (Click_Object == self.sheep
@@ -182,12 +186,19 @@ class Game:
         self.cabbage.update()
         self.person.update()
 
+        self.btn_test.update()
+
+        Delta = 0
         for index, item in enumerate(self.NotCrossed):
-            item.absMove((300 - (70 * (index + 1)) - 25,
+            Delta = Delta + item.width + 25 
+            item.absMove((300 - Delta,
                           height - self.ground.get_height() - item.height))
+            
+        Delta = 0
         for index, item in enumerate(self.Crossed):
-            item.absMove((width - 300 + (70 * (index + 1)) - 25,
+            item.absMove((width - 300 + Delta + 25,
                           height - self.ground.get_height() - item.height))
+            Delta = Delta + item.width + 25
 
     def run_logic(self):
         # Determine Complete
@@ -208,7 +219,7 @@ class Game:
         screen.fill((255, 255, 255))
         screen.blit(self.background, self.background.get_rect())
         pg.draw.rect(self.ground, (30, 160, 255),
-                     (300, 0, 445, self.ground.get_height()), 0)
+                     (300, 0, width - 600, self.ground.get_height()), 0)
         screen.blit(self.ground, (0, height - self.ground.get_height()))
 
         # Draw title

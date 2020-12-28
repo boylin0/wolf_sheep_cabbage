@@ -41,3 +41,4 @@ class Wolf(BaseGObject):
         ]
 
         super(Wolf, self).__init__(animated, 0.2, x, y)
+        self.setMaxSpeed(10)
