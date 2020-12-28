@@ -3,14 +3,29 @@ import pygame as pg
 from Utils.Utils import clamp
 
 
-class Boat:
-    def __init__(self, x, y):
+class BaseGObject:
+    def __init__(self, animatedList, resizeRate, x, y):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('media/boat.png')
-        self.width = (int)(self.image.get_width() * 0.5)
-        self.height = (int)(self.image.get_height() * 0.5)
-        self.image = pg.transform.scale(
-            self.image, (self.width, self.height)).convert_alpha()
+
+        # load base image size
+        self.image = pg.image.load(animatedList[0]['path'])
+        self.width = (int)(self.image.get_width() * resizeRate)
+        self.height = (int)(self.image.get_height() * resizeRate)
+
+        # load images for animating
+        self._animatedList = []
+
+        for frame in animatedList:
+            self._animatedList.append({
+                    'image': pg.transform.scale(pg.image.load(frame['path']), (self.width, self.height)).convert_alpha(),
+                    'duration': frame['duration']
+            })
+        
+        self._animatedIndex = 0
+        self._lastAnimationChanged = pg.time.get_ticks()
+        self.image = self._animatedList[self._animatedIndex]['image']
+
+        # define object position & status
         self.x = x
         self.y = y
         self._target_pos_x = x
@@ -19,8 +34,6 @@ class Boat:
                             self.image.get_height())
         self.maxSpeed = 3
         self.isMoving = False
-        self.Carrying = None
-        self.Crossed = False
 
     def setPos(self, pos):
         self.x = pos[0]
@@ -44,6 +57,13 @@ class Boat:
         move_delta_x = 0
         move_delta_y = 0
 
+        if pg.time.get_ticks() - self._lastAnimationChanged > self._animatedList[self._animatedIndex % len(
+                self._animatedList)]['duration']:
+            self._animatedIndex += 1
+            self.image = self._animatedList[self._animatedIndex % len(
+                self._animatedList)]['image']
+            self._lastAnimationChanged = pg.time.get_ticks()
+
         if self.isMoving == True:
 
             if self._target_pos_x > self.x:
@@ -63,11 +83,6 @@ class Boat:
                 move_delta_y = - \
                     clamp((self.y - self._target_pos_y) *
                           0.1, -self.maxSpeed, self.maxSpeed)
-
-        if not self.Carrying == None and self.isMoving:
-            self.Carrying.setPos(
-                (self.x + self.width - self.Carrying.width - 10,
-                 self.rect.bottom - self.Carrying.height - 30))
 
         if abs(move_delta_x) < 0.08 and abs(move_delta_y) < 0.08:
             self.isMoving = False

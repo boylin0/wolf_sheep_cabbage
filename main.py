@@ -29,25 +29,6 @@ class Game:
 
         self.done = False
 
-        self.sheep = Sheep(100, 250)
-        self.sheep.setPos((300 - self.sheep.width - 10,
-                           height - self.sheep.height - 100))
-
-        self.cabbage = Cabbage(100, 250)
-        self.cabbage.setPos(
-            (self.sheep.x - self.cabbage.width - 10, height - self.cabbage.height - 100))
-
-        self.wolf = Wolf(100, 250)
-        self.wolf.setPos(
-            (self.cabbage.x - self.wolf.width - 10, height - self.wolf.height - 100))
-
-        self.boat = Boat(100, 250)
-        self.boat.setPos((300, height - self.boat.height - 60))
-
-        self.person = Person(300, 300)
-        self.person.setPos(
-            (self.boat.x + 20, self.boat.y - self.person.height + 50))
-
         self.background = pg.image.load('media/background.png')
         self.background = pg.transform.scale(
             self.background, (width, height)).convert()
@@ -56,9 +37,29 @@ class Game:
         self.ground = pg.transform.scale(self.ground, (width, (int)(
             self.ground.get_height() * (width / self.ground.get_width())))).convert_alpha()
 
-        self.OnBoat = None
         self.Crossed = set()
-        self.NotCrossed = {self.sheep, self.cabbage, self.wolf}
+        self.NotCrossed = set()
+
+        self.boat = Boat(0, 0)
+        self.boat.setPos(
+            (300, height - self.ground.get_height() - (self.boat.height * 0.5)))
+
+        self.sheep = Sheep(0, 0)
+        self.NotCrossed.add(self.sheep)
+        self.sheep.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+                           height - self.sheep.height - 100))
+
+        self.cabbage = Cabbage(0, 0)
+        self.NotCrossed.add(self.cabbage)
+        self.cabbage.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+                             height - self.cabbage.height - 100))
+
+        self.wolf = Wolf(0, 0)
+        self.NotCrossed.add(self.wolf)
+        self.wolf.setPos((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+                          height - self.wolf.height - 100))
+
+        self.person = Person(300, 300)
 
     def run(self):
         while not self.done:
@@ -74,14 +75,15 @@ class Game:
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     Click_Object = None
-                    if self.boat.wasClicked(event):
-                        Click_Object = self.boat
-                    if self.sheep.wasClicked(event):
-                        Click_Object = self.sheep
+                    # Click Object (Order by priority)
                     if self.cabbage.wasClicked(event):
                         Click_Object = self.cabbage
                     if self.wolf.wasClicked(event):
                         Click_Object = self.wolf
+                    if self.sheep.wasClicked(event):
+                        Click_Object = self.sheep
+                    if self.boat.wasClicked(event):
+                        Click_Object = self.boat
 
                     if Click_Object == self.boat and self.boat.isMoving == False:
                         print('Click On Boat')
@@ -92,20 +94,61 @@ class Game:
                             self.boat.move((-300, 0))
                             self.boat.Crossed = False
 
-                    if Click_Object == self.sheep and self.boat.isMoving == False:
-                        print('Click On Sheep')
-                        self.sheep.absMove(
-                            (self.boat.x + self.boat.width - self.sheep.width - 10,
-                             self.boat.y + self.boat.height - self.sheep.height - 40))
-                        self.boat.Carrying = self.sheep
+                    if self.boat.isMoving == False:
+                        if (Click_Object == self.sheep
+                        or Click_Object == self.cabbage
+                        or Click_Object == self.wolf):
 
+                            print('Click On {0}'.format(
+                                Click_Object.__class__.__name__))
+
+                            if self.boat.Carrying == Click_Object:
+                                # Unload An Object to Crossed Side
+                                if self.boat.Crossed == True:
+                                    self.Crossed.add(Click_Object)
+                                    Click_Object.absMove((self.boat.rect.right + 10,
+                                                        height - Click_Object.height - 100))
+
+                                # Unload An Object to Not Crossed Side
+                                if self.boat.Crossed == False:
+                                    Click_Object.absMove((self.boat.x - (70 * len(self.NotCrossed)) - 25,
+                                                        height - Click_Object.height - 100))
+                                    self.NotCrossed.add(Click_Object)
+
+                                # Unload Object On The Boat
+                                self.boat.Carrying = None
+
+                            elif self.boat.Carrying == None:
+
+                                # Carry A Not Crossed Object
+                                if Click_Object in self.NotCrossed and self.boat.Crossed == False:
+                                    Click_Object.absMove(
+                                        (self.boat.x + self.boat.width - Click_Object.width - 10,
+                                        self.boat.rect.bottom - Click_Object.height - 30))
+                                    self.boat.Carrying = Click_Object
+                                    self.NotCrossed.remove(Click_Object)
+
+                                # Carry A Crossed Object
+                                if Click_Object in self.Crossed and self.boat.Crossed == True:
+                                    Click_Object.absMove(
+                                        (self.boat.x + self.boat.width - Click_Object.width - 10,
+                                        self.boat.rect.bottom - Click_Object.height - 30))
+                                    self.boat.Carrying = Click_Object
+                                    self.Crossed.remove(Click_Object)
 
     def run_logic(self):
         self.person.setPos(
-            (self.boat.x + 20, self.boat.y - self.person.height + 50))
+            (self.boat.x + 20, self.boat.rect.bottom - self.person.height - 10))
         self.boat.update()
         self.sheep.update()
-        
+        self.wolf.update()
+        self.cabbage.update()
+        for index, item in enumerate(self.NotCrossed):
+            item.absMove((300 - (70 * (index + 1)) - 25,
+                          height - self.ground.get_height() - item.height))
+        for index, item in enumerate(self.Crossed):
+            item.absMove((width - 300 + (70 * (index + 1)) - 25,
+                          height - self.ground.get_height() - item.height))
 
     def draw(self):
         # Fill Background
