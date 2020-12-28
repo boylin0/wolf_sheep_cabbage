@@ -1,142 +1,22 @@
 from pygame.locals import QUIT
-import pygame
 import sys
+import os
 import pygame as pg
 
+from GObject.Sheep import Sheep
+from GObject.Wolf import Wolf
+from GObject.Cabbage import Cabbage
+from GObject.Boat import Boat
 
-class Sheep:
-    def __init__(self, x, y):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('media/sheep.png')
-        self.width = (int)(self.image.get_width() * 0.1)
-        self.height = (int)(self.image.get_height() * 0.1)
-        self.image = pg.transform.scale(
-            self.image, (self.width, self.height)).convert_alpha()
-        self.x = x
-        self.y = y
-        self.rect = pg.Rect(x, y, self.image.get_width(),
-                            self.image.get_height())
+# Set Window Position
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
 
-    def setPos(self, pos):
-        self.x = pos[0]
-        self.y = pos[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def move(self, move):
-        self.x += move[0]
-        self.y += move[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def wasClicked(self, event):
-        if self.rect.collidepoint(event.pos):
-            return True
-        else:
-            return False
-
-
-class Wolf:
-    def __init__(self, x, y):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('media/wolf.png')
-        self.width = (int)(self.image.get_width() * 0.2)
-        self.height = (int)(self.image.get_height() * 0.2)
-        self.image = pg.transform.scale(
-            self.image, (self.width, self.height)).convert_alpha()
-        self.x = x
-        self.y = y
-        self.rect = pg.Rect(x, y, self.image.get_width(),
-                            self.image.get_height())
-
-    def setPos(self, pos):
-        self.x = pos[0]
-        self.y = pos[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def move(self, move):
-        self.x += move[0]
-        self.y += move[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def wasClicked(self, event):
-        if self.rect.collidepoint(event.pos):
-            return True
-        else:
-            return False
-
-
-class Cabbage:
-    def __init__(self, x, y):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('media/cabbage.png')
-        self.width = (int)(self.image.get_width() * 0.2)
-        self.height = (int)(self.image.get_height() * 0.2)
-        self.image = pg.transform.scale(
-            self.image, (self.width, self.height)).convert_alpha()
-        self.x = x
-        self.y = y
-        self.rect = pg.Rect(x, y, self.image.get_width(),
-                            self.image.get_height())
-
-    def setPos(self, pos):
-        self.x = pos[0]
-        self.y = pos[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def move(self, move):
-        self.x += move[0]
-        self.y += move[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def wasClicked(self, event):
-        if self.rect.collidepoint(event.pos):
-            return True
-        else:
-            return False
-
-
-class Boat:
-    def __init__(self, x, y):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('media/boat.png')
-        self.width = (int)(self.image.get_width() * 0.5)
-        self.height = (int)(self.image.get_height() * 0.5)
-        self.image = pg.transform.scale(
-            self.image, (self.width, self.height)).convert_alpha()
-        self.x = x
-        self.y = y
-        self.rect = pg.Rect(x, y, self.image.get_width(),
-                            self.image.get_height())
-
-    def setPos(self, pos):
-        self.x = pos[0]
-        self.y = pos[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def move(self, move):
-        self.x += move[0]
-        self.y += move[1]
-        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
-                            self.image.get_height())
-
-    def wasClicked(self, event):
-        if self.rect.collidepoint(event.pos):
-            return True
-        else:
-            return False
-
-
+# Start Game Window
 pg.init()
 width = 1024
 height = 768
 screen = pg.display.set_mode((width, height))
-pg.display.set_caption('wolf & sheep & cabbage')
+pg.display.set_caption('Wolf & Sheep & Cabbage')
 
 
 class Game:
@@ -212,7 +92,7 @@ class Game:
                             if self.OnBoat == None:
                                 self.sheep.setPos(
                                     (self.boat.x + 60, self.boat.y - 30))
-                                self.OnBoat = self.sheep 
+                                self.OnBoat = self.sheep
                             elif self.OnBoat == self.sheep:
                                 if not self.BoatCrossed:
                                     self.sheep.setPos((300 - self.sheep.width - 10,
@@ -243,16 +123,15 @@ OnBoat:{0}\n
 Crossed:{1}\n
 NotCrossed:{2}\n
 '''.format(
-    self.OnBoat,
-    self.Crossed,
-    self.NotCrossed)
+            self.OnBoat,
+            self.Crossed,
+            self.NotCrossed)
         inf_index = 0
         for txt in Info.split('\n'):
             text_surface = head_font.render(
-                txt
-                , True, (0, 0, 0))
+                txt, True, (0, 0, 0))
             screen.blit(text_surface, (10, 23 + (7 * inf_index)))
-            inf_index+=1
+            inf_index += 1
 
         # Draw Sheep
         screen.blit(self.sheep.image, self.sheep.rect)
