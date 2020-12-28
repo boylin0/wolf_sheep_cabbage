@@ -7,6 +7,7 @@ from GObject.Sheep import Sheep
 from GObject.Wolf import Wolf
 from GObject.Cabbage import Cabbage
 from GObject.Boat import Boat
+from GObject.Person import Person
 
 # Set Window Position
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
@@ -22,16 +23,11 @@ pg.display.set_caption('Wolf & Sheep & Cabbage')
 class Game:
 
     def __init__(self):
-        self.fps = 30
+        self.fps = 60
         self.clock = pg.time.Clock()
         self.font = pg.font.Font(None, 20)
 
         self.done = False
-
-        self.OnBoat = None
-        self.BoatCrossed = False
-        self.Crossed = set()
-        self.NotCrossed = set()
 
         self.sheep = Sheep(100, 250)
         self.sheep.setPos((300 - self.sheep.width - 10,
@@ -46,7 +42,11 @@ class Game:
             (self.cabbage.x - self.wolf.width - 10, height - self.wolf.height - 100))
 
         self.boat = Boat(100, 250)
-        self.boat.setPos((300, height - self.boat.height - 50))
+        self.boat.setPos((300, height - self.boat.height - 60))
+
+        self.person = Person(300, 300)
+        self.person.setPos(
+            (self.boat.x + 20, self.boat.y - self.person.height + 50))
 
         self.background = pg.image.load('media/background.png')
         self.background = pg.transform.scale(
@@ -56,6 +56,8 @@ class Game:
         self.ground = pg.transform.scale(self.ground, (width, (int)(
             self.ground.get_height() * (width / self.ground.get_width())))).convert_alpha()
 
+        self.OnBoat = None
+        self.Crossed = set()
         self.NotCrossed = {self.sheep, self.cabbage, self.wolf}
 
     def run(self):
@@ -71,44 +73,46 @@ class Game:
                 self.done = True
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    Click_Object = None
                     if self.boat.wasClicked(event):
+                        Click_Object = self.boat
+                    if self.sheep.wasClicked(event):
+                        Click_Object = self.sheep
+                    if self.cabbage.wasClicked(event):
+                        Click_Object = self.cabbage
+                    if self.wolf.wasClicked(event):
+                        Click_Object = self.wolf
 
-                        # Boat Cross River
-                        if self.BoatCrossed:
-                            self.boat.setPos(
-                                (300, self.boat.y))
+                    if Click_Object == self.boat and self.boat.isMoving == False:
+                        print('Click On Boat')
+                        if self.boat.Crossed == False:
+                            self.boat.move((300, 0))
+                            self.boat.Crossed = True
                         else:
-                            self.boat.setPos(
-                                (width - 300 - self.boat.width, self.boat.y))
-                        self.BoatCrossed = not self.BoatCrossed
+                            self.boat.move((-300, 0))
+                            self.boat.Crossed = False
 
-                        # Move Object On Boat
-                        if not self.OnBoat == None:
-                            self.OnBoat.setPos(
-                                (self.boat.x + 60, self.boat.y - 30))
+                    if Click_Object == self.sheep and self.boat.isMoving == False:
+                        print('Click On Sheep')
+                        self.sheep.absMove(
+                            (self.boat.x + self.boat.width - self.sheep.width - 10,
+                             self.boat.y + self.boat.height - self.sheep.height - 40))
+                        self.boat.Carrying = self.sheep
 
-                    else:
-                        if self.sheep.wasClicked(event):
-                            if self.OnBoat == None:
-                                self.sheep.setPos(
-                                    (self.boat.x + 60, self.boat.y - 30))
-                                self.OnBoat = self.sheep
-                            elif self.OnBoat == self.sheep:
-                                if not self.BoatCrossed:
-                                    self.sheep.setPos((300 - self.sheep.width - 10,
-                                                       height - self.sheep.height - 100))
-                                else:
-                                    self.sheep.setPos((width - 300,
-                                                       height - self.sheep.height - 100))
-                                self.OnBoat = None
 
     def run_logic(self):
-        pass
+        self.person.setPos(
+            (self.boat.x + 20, self.boat.y - self.person.height + 50))
+        self.boat.update()
+        self.sheep.update()
+        
 
     def draw(self):
         # Fill Background
         screen.fill((255, 255, 255))
         screen.blit(self.background, self.background.get_rect())
+        pg.draw.rect(self.ground, (30, 160, 255),
+                     (300, 0, 445, self.ground.get_height()), 0)
         screen.blit(self.ground, (0, height - self.ground.get_height()))
         # Draw title
         head_font = pg.font.SysFont(None, 16)
@@ -116,22 +120,20 @@ class Game:
             'wolf & sheep & cabbage [FPS: {0:.2f}]'.format(self.clock.get_fps()), True, (0, 0, 0))
         screen.blit(text_surface, (10, 10))
 
-        # Draw Info
+        # Draw Debug Info
         Info = '''
 [DEBUG]\n
-OnBoat:{0}\n
+boat.Carrying:{0}\n
 Crossed:{1}\n
 NotCrossed:{2}\n
 '''.format(
-            self.OnBoat,
+            self.boat.Carrying,
             self.Crossed,
             self.NotCrossed)
-        inf_index = 0
-        for txt in Info.split('\n'):
+        for txt_index, txt in enumerate(Info.split('\n')):
             text_surface = head_font.render(
                 txt, True, (0, 0, 0))
-            screen.blit(text_surface, (10, 23 + (7 * inf_index)))
-            inf_index += 1
+            screen.blit(text_surface, (10, 23 + (7 * txt_index)))
 
         # Draw Sheep
         screen.blit(self.sheep.image, self.sheep.rect)
@@ -139,6 +141,8 @@ NotCrossed:{2}\n
         screen.blit(self.wolf.image, self.wolf.rect)
         # Draw Cabbage
         screen.blit(self.cabbage.image, self.cabbage.rect)
+        # Draw Person
+        screen.blit(self.person.image, self.person.rect)
         # Draw Boat
         screen.blit(self.boat.image, self.boat.rect)
         pg.display.flip()
