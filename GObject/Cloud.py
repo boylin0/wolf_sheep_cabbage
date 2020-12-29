@@ -31,11 +31,12 @@ class Cloud(BaseGObject):
         self.SizeMax = SizeMax
         self.setPos((random.randrange(-self.width, self.loopWidth),
                      random.randrange(self.HeightStart, self.HeightStart+self.HeightRange)))
+        self._original_image = self.image
         self._rand_cloud_scale()
 
     def _rand_cloud_scale(self):
         scale = random.uniform(self.SizeMin,self.SizeMax)
-        self.image = pg.transform.scale(self.image, (int(self._original_width * scale), int(self._original_height * scale)))
+        self.image = pg.transform.scale(self._original_image, (int(self._original_width * scale), int(self._original_height * scale)))
         self.width = self._original_width * scale
         self.height = self._original_height * scale
         self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
