@@ -185,7 +185,7 @@ class Game:
 
     def run_update(self):
         self.person.setPos(
-            (self.boat.x + 10, self.boat.rect.bottom - self.person.height - 10))
+            (self.boat.x + 15, self.boat.rect.bottom - self.person.height - 10))
         self.boat.update()
         self.sheep.update()
         self.wolf.update()
