@@ -79,3 +79,4 @@ class Sheep(BaseGObject):
 
         super(Sheep, self).__init__(animated, 0.125, x, y)
         self.setMaxSpeed(10)
+        self.setFlip(True, False)

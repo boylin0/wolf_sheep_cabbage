@@ -195,17 +195,19 @@ class Game:
             cloud.update()
         self.btn_test.update()
 
-        Delta = 0
-        for index, item in enumerate(self.NotCrossed):
-            Delta = Delta + item.width + 25
-            item.absMove((300 - Delta,
-                          height - self.ground.get_height() - item.height))
 
-        Delta = 0
-        for index, item in enumerate(self.Crossed):
-            item.absMove((width - 300 + Delta + 25,
-                          height - self.ground.get_height() - item.height))
-            Delta = Delta + item.width + 25
+        if self.gameover == False and self.complete == False:
+            Delta = 0
+            for index, item in enumerate(self.NotCrossed):
+                Delta = Delta + item.width + 25
+                item.absMove((300 - Delta,
+                            height - self.ground.get_height() - item.height))
+
+            Delta = 0
+            for index, item in enumerate(self.Crossed):
+                item.absMove((width - 300 + Delta + 25,
+                            height - self.ground.get_height() - item.height))
+                Delta = Delta + item.width + 25
 
     def run_logic(self):
         # Determine Complete
@@ -218,8 +220,11 @@ class Game:
                 for Side in [self.NotCrossed, self.Crossed]:
                     if self.sheep in Side and self.cabbage in Side:
                         self.gameover = True
+                        self.sheep.absMove((self.cabbage.rect.x - self.sheep.width + 20,self.cabbage.rect.bottom - self.sheep.height))
                     if self.wolf in Side and self.sheep in Side:
                         self.gameover = True
+                        self.wolf.absMove((self.sheep.rect.x - self.sheep.width + 20,self.sheep.rect.bottom - self.wolf.height))
+
 
     def draw(self):
         # Fill Background
