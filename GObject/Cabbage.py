@@ -19,6 +19,14 @@ class Cabbage(BaseGObject):
                 'duration': 200
             },
             {
+                'path': 'media/cabbage/cabbage_3.png',
+                'duration': 200
+            },
+            {
+                'path': 'media/cabbage/cabbage_2.png',
+                'duration': 200
+            },
+            {
                 'path': 'media/cabbage/cabbage_1.png',
                 'duration': 200
             },
