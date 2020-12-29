@@ -102,3 +102,25 @@ class Sheep(BaseGObject):
                 {'path': 'media/sheep/sheep_eat_2.png', 'duration': 100},
                 {'path': 'media/sheep/sheep_eat_1.png', 'duration': 100},
             ])
+
+        self.AddAnimation(
+            'wolf_eat_sheep',
+            [
+                {'path': 'media/sheep/sheep_wolfeat_0.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_1.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_2.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_3.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_4.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_5.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_6.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_7.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_8.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_9.png', 'duration': 200},
+                {'path': 'media/sheep/sheep_wolfeat_10.png', 'duration': 200},
+            ])
+
+        self.AddAnimation(
+            'sheep_dead',
+            [
+                {'path': 'media/sheep/sheep_wolfeat_10.png', 'duration': 1000},
+            ])

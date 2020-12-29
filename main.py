@@ -105,14 +105,11 @@ class Game:
 
                     if self.btn_test.wasClicked(event):
                         print('this is a test button')
-                        self.cabbage.PlayAnimationOnce('eat_cabbage')
-                        self.cabbage.setAnimationIdle('eaten')
-                        """ 
                         self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
                         self.boat.Crossed = True
                         self.Crossed = [self.sheep, self.wolf, self.cabbage]
                         self.NotCrossed = set() 
-                        """
+                        
                         
 
                     if self.gameover == True or self.complete == True:
@@ -186,6 +183,23 @@ class Game:
                                         self.boat.Carrying = Click_Object
                                         self.Crossed.remove(Click_Object)
 
+                                elif self.boat.Carrying != Click_Object:
+                                    # Switch An Object from Crossed Side
+                                    if self.boat.Crossed == True and Click_Object in self.Crossed:
+                                        self.Crossed.add(self.boat.Carrying)
+                                        self.boat.Carrying = Click_Object
+                                        self.Crossed.remove(Click_Object)
+                                        Click_Object.absMove((self.boat.x + self.boat.width - Click_Object.width - 10,
+                                                             self.boat.rect.bottom - Click_Object.height - 30))
+
+                                    # Switch An Object from Not Crossed Side
+                                    if self.boat.Crossed == False and Click_Object in self.NotCrossed:
+                                        self.NotCrossed.add(self.boat.Carrying)
+                                        self.boat.Carrying = Click_Object
+                                        self.NotCrossed.remove(Click_Object)
+                                        Click_Object.absMove((self.boat.x + self.boat.width - Click_Object.width - 10,
+                                                             self.boat.rect.bottom - Click_Object.height - 30))
+
     def run_update(self):
         self.person.setPos(
             (self.boat.x + 15, self.boat.rect.bottom - self.person.height - 10))
@@ -229,8 +243,10 @@ class Game:
                         self.sheep.PlayAnimationOnce('eat_cabbage')
                     if self.wolf in Side and self.sheep in Side:
                         self.gameover = True
-                        self.wolf.absMove((self.sheep.rect.x - self.sheep.width + 20,self.sheep.rect.bottom - self.wolf.height))
-
+                        self.wolf.absMove((self.sheep.rect.x - self.sheep.width +15 ,self.sheep.rect.bottom - self.wolf.height))
+                        self.sheep.PlayAnimationOnce('wolf_eat_sheep')
+                        self.sheep.setAnimationIdle('sheep_dead')
+                        self.wolf.PlayAnimationOnce('wolf_eat_sheep')
 
     def draw(self):
         # Fill Background
@@ -273,10 +289,10 @@ NotCrossed:{2}\n
         # Draw Button
         screen.blit(self.btn_reset.image, self.btn_reset.rect)
         screen.blit(self.btn_test.image, self.btn_test.rect)
-        # Draw Sheep
-        screen.blit(self.sheep.image, self.sheep.rect)
         # Draw Wolf
         screen.blit(self.wolf.image, self.wolf.rect)
+        # Draw Sheep
+        screen.blit(self.sheep.image, self.sheep.rect)
         # Draw Cabbage
         screen.blit(self.cabbage.image, self.cabbage.rect)
         # Draw Person
