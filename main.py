@@ -1,3 +1,4 @@
+from pygame import time
 from pygame.locals import QUIT
 import sys
 import os
@@ -305,7 +306,7 @@ NotCrossed:{2}\n
 if __name__ == "__main__":
 
     # Set Window Position
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
+    #os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 270)
 
     # Start Game Window
     pg.init()
@@ -314,7 +315,24 @@ if __name__ == "__main__":
     screen = pg.display.set_mode((width, height))
     pg.display.set_caption('Wolf & Sheep & Cabbage')
     reRun = True
+    img_loading = pg.image.load('media/ui/ui_loading.png')
+    scale = (width / img_loading.get_width())
+    img_loading = pg.transform.scale(img_loading, (int(img_loading.get_width() * scale), int(img_loading.get_height() * scale))).convert_alpha()
     while reRun:
+
+        # display loading title
+        screen.fill((255, 255, 255))
+        screen.blit(img_loading, pg.Rect(0,0,width,height))
+        pg.display.flip()
+
+        # handle window event
+        for i in range(10):
+            pg.time.delay(100)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+
         if not Game().run():
             reRun = True
         else:
