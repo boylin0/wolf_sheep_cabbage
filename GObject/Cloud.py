@@ -36,6 +36,10 @@ class Cloud(BaseGObject):
     def _rand_cloud_scale(self):
         scale = random.uniform(self.SizeMin,self.SizeMax)
         self.image = pg.transform.scale(self.image, (int(self._original_width * scale), int(self._original_height * scale)))
+        self.width = self._original_width * scale
+        self.height = self._original_height * scale
+        self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
+                            self.image.get_height())
 
     def update(self):
         if self.x < -self.width:
