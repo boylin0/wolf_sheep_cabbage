@@ -8,6 +8,7 @@ from GObject.Wolf import Wolf
 from GObject.Cabbage import Cabbage
 from GObject.Boat import Boat
 from GObject.Person import Person
+from GObject.Cloud import Cloud
 from GObject.UIObject import UIObject
 
 
@@ -30,6 +31,10 @@ class Game:
         self.ground = pg.image.load('media/ground.png')
         self.ground = pg.transform.scale(self.ground, (width, (int)(
             self.ground.get_height() * (width / self.ground.get_width())))).convert_alpha()
+
+        self.clouds = []
+        for i in range(5):
+            self.clouds.append(Cloud(width, 30, 300, 0.2, 0.9))
 
         self.Crossed = set()
         self.NotCrossed = set()
@@ -100,10 +105,12 @@ class Game:
 
                     if self.btn_test.wasClicked(event):
                         print('this is a test button')
+                        
                         self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
                         self.boat.Crossed = True
                         self.Crossed = [self.sheep, self.wolf, self.cabbage]
                         self.NotCrossed = set()
+                        
 
                     if self.gameover == True or self.complete == True:
                         if self.btn_replay.wasClicked(event):
@@ -126,14 +133,13 @@ class Game:
                         if Click_Object == self.boat and self.boat.isMoving == False:
                             print('Click On Boat')
                             if self.boat.Crossed == False:
-                                self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
+                                self.boat.absMove(
+                                    (width - 300 - self.boat.width, self.boat.y))
                                 self.boat.Crossed = True
-                                
+
                             else:
                                 self.boat.absMove((300, self.boat.y))
                                 self.boat.Crossed = False
-                                
-
 
                         if self.boat.isMoving == False:
                             if (Click_Object == self.sheep
@@ -185,15 +191,16 @@ class Game:
         self.wolf.update()
         self.cabbage.update()
         self.person.update()
-
+        for cloud in self.clouds:
+            cloud.update()
         self.btn_test.update()
 
         Delta = 0
         for index, item in enumerate(self.NotCrossed):
-            Delta = Delta + item.width + 25 
+            Delta = Delta + item.width + 25
             item.absMove((300 - Delta,
                           height - self.ground.get_height() - item.height))
-            
+
         Delta = 0
         for index, item in enumerate(self.Crossed):
             item.absMove((width - 300 + Delta + 25,
@@ -221,7 +228,10 @@ class Game:
         pg.draw.rect(self.ground, (30, 160, 255),
                      (300, 0, width - 600, self.ground.get_height()), 0)
         screen.blit(self.ground, (0, height - self.ground.get_height()))
-
+        # Draw Cloud
+        for cloud in self.clouds:
+            screen.blit(cloud.image, cloud.rect)
+        
         # Draw title
         text_surface = self.font.render(
             'wolf & sheep & cabbage [FPS: {0:.2f}]'.format(self.clock.get_fps()), True, (0, 0, 0))

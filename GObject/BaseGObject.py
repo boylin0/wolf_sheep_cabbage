@@ -11,6 +11,10 @@ class BaseGObject:
         self.image = pg.image.load(animatedList[0]['path'])
         self.width = (int)(self.image.get_width() * resizeRate)
         self.height = (int)(self.image.get_height() * resizeRate)
+        self._original_width = self.width
+        self._original_height = self.height
+        self._original_x = x
+        self._original_y = y
 
         # load images for animating
         self._animatedList = []
@@ -35,14 +39,12 @@ class BaseGObject:
         self.maxSpeed = 3
         self.isMoving = False
 
-
     def setMaxSpeed(self, val):
         self.maxSpeed = val
 
     def setFlip(self, xbool, ybool):
         for img in self._animatedList:
             img['image'] = pg.transform.flip(img['image'], xbool, ybool)
-
 
     def setPos(self, pos):
         self.x = pos[0]
@@ -95,7 +97,6 @@ class BaseGObject:
                     clamp((self.y - self._target_pos_y) *
                           0.1, -self.maxSpeed, self.maxSpeed)
 
-   
         # Moving Done
         if abs(move_delta_x) < 0.08 and abs(move_delta_y) < 0.08:
             self.isMoving = False
