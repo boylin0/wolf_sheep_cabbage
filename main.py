@@ -105,11 +105,14 @@ class Game:
 
                     if self.btn_test.wasClicked(event):
                         print('this is a test button')
-                        
+                        self.cabbage.PlayAnimationOnce('eat_cabbage')
+                        self.cabbage.setAnimationIdle('eaten')
+                        """ 
                         self.boat.absMove((width - 300 - self.boat.width, self.boat.y))
                         self.boat.Crossed = True
                         self.Crossed = [self.sheep, self.wolf, self.cabbage]
-                        self.NotCrossed = set()
+                        self.NotCrossed = set() 
+                        """
                         
 
                     if self.gameover == True or self.complete == True:
@@ -215,12 +218,15 @@ class Game:
             self.complete = True
 
         # Determine GameOver
-        if self.boat.isMoving:
+        if self.boat.isMoving and self.gameover == False:
             if not self.NotCrossed == set():
                 for Side in [self.NotCrossed, self.Crossed]:
                     if self.sheep in Side and self.cabbage in Side:
                         self.gameover = True
-                        self.sheep.absMove((self.cabbage.rect.x - self.sheep.width + 20,self.cabbage.rect.bottom - self.sheep.height))
+                        self.sheep.absMove((self.cabbage.rect.x - self.sheep.width + 45,self.cabbage.rect.bottom - self.sheep.height))
+                        self.cabbage.PlayAnimationOnce('eat_cabbage')
+                        self.cabbage.setAnimationIdle('eaten')
+                        self.sheep.PlayAnimationOnce('eat_cabbage')
                     if self.wolf in Side and self.sheep in Side:
                         self.gameover = True
                         self.wolf.absMove((self.sheep.rect.x - self.sheep.width + 20,self.sheep.rect.bottom - self.wolf.height))

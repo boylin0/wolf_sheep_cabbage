@@ -17,17 +17,24 @@ class BaseGObject:
         self._original_y = y
 
         # load images for animating
-        self._animatedList = []
+        self._named_animations = {}
+
+        self._named_animations['Idle'] = []
 
         for frame in animatedList:
-            self._animatedList.append({
+            self._named_animations['Idle'].append({
                 'image': pg.transform.scale(pg.image.load(frame['path']), (self.width, self.height)).convert_alpha(),
                 'duration': frame['duration']
             })
 
+        self._animationIdleName = 'Idle'
+
+        # Load Named Animation
         self._animatedIndex = 0
         self._lastAnimationChanged = pg.time.get_ticks()
-        self.image = self._animatedList[self._animatedIndex]['image']
+        self.image = self._named_animations['Idle'][0]['image']
+        self._onceAnimation = False
+        self._animationName = self._animationIdleName
 
         # define object position & status
         self.x = x
@@ -39,12 +46,45 @@ class BaseGObject:
         self.maxSpeed = 3
         self.isMoving = False
 
+    def AddAnimation(self, animationName, animation):
+        '''
+        animation = [
+            {'path': 'media/cabbage/cabbage_eat_0.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_1.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_2.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_3.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_4.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_5.png', 'duration': 100},
+            {'path': 'media/cabbage/cabbage_eat_6.png', 'duration': 100},
+        ]
+        '''
+        self._named_animations[animationName] = []
+        for f in animation:
+            self._named_animations[animationName].append(
+                {
+                    'image': pg.transform.scale(pg.image.load(f['path']), (self.width, self.height)).convert_alpha(),
+                    'duration': f['duration']
+                }
+            )
+
+    def PlayAnimationOnce(self, animationName):
+        if self._animationName == animationName:
+            return
+        self._animatedIndex = 0
+        self._lastAnimationChanged = pg.time.get_ticks()
+        self._animationName = animationName
+
     def setMaxSpeed(self, val):
         self.maxSpeed = val
 
     def setFlip(self, xbool, ybool):
-        for img in self._animatedList:
-            img['image'] = pg.transform.flip(img['image'], xbool, ybool)
+        pass
+        #for animationName in enumerate(self._named_animations):
+        #    for Frame in enumerate(animationName):
+        #        print(Frame)
+        #Frame['image'] = pg.transform.flip(Frame['image'], xbool, ybool)
+        #for x in animationName:
+        #x['image'] = pg.transform.flip(x['image'], xbool, ybool)
 
     def setPos(self, pos):
         self.x = pos[0]
@@ -64,15 +104,26 @@ class BaseGObject:
         self._target_pos_x = move[0]
         self._target_pos_y = move[1]
 
+    def setAnimationIdle(self, animationName):
+        self._animationIdleName = animationName
+
     def update(self):
 
         # Animation Images
-        if pg.time.get_ticks() - self._lastAnimationChanged > self._animatedList[self._animatedIndex % len(
-                self._animatedList)]['duration']:
+
+        frameIndex = self._animatedIndex % len(self._named_animations[self._animationName])
+        frameDuration = self._named_animations[self._animationName][frameIndex]['duration']
+        if pg.time.get_ticks() - self._lastAnimationChanged > frameDuration:
+
+            frameImage = self._named_animations[self._animationName][frameIndex]['image']
+            self.image = frameImage
+
+            if frameIndex == len(self._named_animations[self._animationName]) - 1:
+                self._animationName = self._animationIdleName
+
             self._animatedIndex += 1
-            self.image = self._animatedList[self._animatedIndex % len(
-                self._animatedList)]['image']
             self._lastAnimationChanged = pg.time.get_ticks()
+
 
         # Animation Moving
         move_delta_x = 0
