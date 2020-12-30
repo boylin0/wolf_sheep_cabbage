@@ -2,8 +2,6 @@
 
 A wolf sheep cabbage game written in Python using the PyGame library. 🎮
 
----
-
 ## Installation
 ```sh
 $ pip3 install pygame
@@ -14,8 +12,6 @@ Download the source code from the repository and execute the following command i
 ```sh
 $ python3 main.py
 ```
-
----
 
 ### Reference
 
