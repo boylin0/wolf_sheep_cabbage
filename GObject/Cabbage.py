@@ -16,7 +16,7 @@ class Cabbage(BaseGObject):
         ]
 
         super(Cabbage, self).__init__(animated, 0.18, x, y)
-        self.setMaxSpeed(10)
+        self.SetMaxSpeed(10)
         self.AddAnimation(
             'eat_cabbage',
             [

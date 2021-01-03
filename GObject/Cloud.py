@@ -23,13 +23,13 @@ class Cloud(BaseGObject):
         ]
 
         super(Cloud, self).__init__(animated, 0.2, 0, 0)
-        self.setMaxSpeed(random.uniform(0.5, 1.0))
+        self.SetMaxSpeed(random.uniform(0.5, 1.0))
         self.loopWidth = width
         self.HeightStart = HeightStart
         self.HeightRange = HeightRange
         self.SizeMin = SizeMin
         self.SizeMax = SizeMax
-        self.setPos((random.randrange(-self.width, self.loopWidth),
+        self.SetPos((random.randrange(-self.width, self.loopWidth),
                      random.randrange(self.HeightStart, self.HeightStart+self.HeightRange)))
         self._original_image = self.image
         self._rand_cloud_scale()
@@ -42,10 +42,10 @@ class Cloud(BaseGObject):
         self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
                             self.image.get_height())
 
-    def update(self):
+    def Update(self):
         if self.x < -self.width:
-            self.setPos((self.loopWidth,
+            self.SetPos((self.loopWidth,
                      random.randrange(self.HeightStart, self.HeightStart+self.HeightRange)))
             self._rand_cloud_scale()
         else:
-            self.setPos((self.x-self.maxSpeed, self.y))
+            self.SetPos((self.x-self.maxSpeed, self.y))

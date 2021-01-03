@@ -7,34 +7,33 @@ class BaseGObject:
     def __init__(self, animatedList, resizeRate, x, y):
         pg.sprite.Sprite.__init__(self)
 
-        # load base image size
-        self.image = pg.image.load(animatedList[0]['path'])
+        # Set image size
+        self._set_image(pg.image.load(animatedList[0]['path']))
         self.width = (int)(self.image.get_width() * resizeRate)
         self.height = (int)(self.image.get_height() * resizeRate)
-        self._original_width = self.width
-        self._original_height = self.height
         self._original_x = x
         self._original_y = y
+        self._original_width = self.width
+        self._original_height = self.height
 
-        # load images for animating
-        self._named_animations = {}
+        # Load images for animating
+        self._animation_all = {}
+        self._animation_default_name = 'Idle'
 
-        self._named_animations['Idle'] = []
-
-        for frame in animatedList:
-            self._named_animations['Idle'].append({
-                'image': pg.transform.scale(pg.image.load(frame['path']), (self.width, self.height)).convert_alpha(),
-                'duration': frame['duration']
-            })
-
-        self._animationIdleName = 'Idle'
+        self._animation_all['Idle'] = []
+        for frame_info in animatedList:
+            frame = {
+                'image': pg.transform.scale(pg.image.load(frame_info['path']), (self.width, self.height)).convert_alpha(),
+                'duration': frame_info['duration']
+            }
+            self._animation_all['Idle'].append(frame)
 
         # Load Named Animation
-        self._animatedIndex = 0
+        self._set_image(self._animation_all['Idle'][0]['image'])
+        self._animation_name = self._animation_default_name
+        self._animated_index = 0
         self._lastAnimationChanged = pg.time.get_ticks()
-        self.image = self._named_animations['Idle'][0]['image']
-        self._onceAnimation = False
-        self._animationName = self._animationIdleName
+        
 
         # define object position & status
         self.x = x
@@ -47,46 +46,32 @@ class BaseGObject:
         self.isMoving = False
 
     def AddAnimation(self, animationName, animation):
-        '''
-        animation = [
-            {'path': 'media/cabbage/cabbage_eat_0.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_1.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_2.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_3.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_4.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_5.png', 'duration': 100},
-            {'path': 'media/cabbage/cabbage_eat_6.png', 'duration': 100},
-        ]
-        '''
-        self._named_animations[animationName] = []
+        self._animation_all[animationName] = []
         for f in animation:
-            self._named_animations[animationName].append(
+            self._animation_all[animationName].append(
                 {
                     'image': pg.transform.scale(pg.image.load(f['path']), (self.width, self.height)).convert_alpha(),
                     'duration': f['duration']
                 }
             )
 
-    def PlayAnimationOnce(self, animationName):
-        if self._animationName == animationName:
-            return
-        self._animatedIndex = 0
-        self._lastAnimationChanged = pg.time.get_ticks()
-        self._animationName = animationName
+    def SetDefaultAnimation(self, animationName):
+        self._animation_default_name = animationName
 
-    def setMaxSpeed(self, val):
+    def PlayAnimation(self, animationName):
+        if self._animation_name == animationName:
+            return
+        self._animated_index = 0
+        self._lastAnimationChanged = pg.time.get_ticks()
+        self._animation_name = animationName
+
+    def SetMaxSpeed(self, val):
         self.maxSpeed = val
 
-    def setFlip(self, xbool, ybool):
+    def SetFlip(self, xbool, ybool):
         pass
-        #for animationName in enumerate(self._named_animations):
-        #    for Frame in enumerate(animationName):
-        #        print(Frame)
-        #Frame['image'] = pg.transform.flip(Frame['image'], xbool, ybool)
-        #for x in animationName:
-        #x['image'] = pg.transform.flip(x['image'], xbool, ybool)
 
-    def setPos(self, pos):
+    def SetPos(self, pos):
         self.x = pos[0]
         self.y = pos[1]
         self._target_pos_x = self.x
@@ -94,36 +79,28 @@ class BaseGObject:
         self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
                             self.image.get_height())
 
-    def move(self, move):
-        self.isMoving = True
-        self._target_pos_x = (self.x + move[0])
-        self._target_pos_y = (self.y + move[1])
-
-    def absMove(self, move):
+    def Move(self, move):
         self.isMoving = True
         self._target_pos_x = move[0]
         self._target_pos_y = move[1]
 
-    def setAnimationIdle(self, animationName):
-        self._animationIdleName = animationName
-
-    def update(self):
+    def Update(self):
 
         # Animation Images
+        frameIndex = self._animated_index % len(
+            self._animation_all[self._animation_name])
+        frameDuration = self._animation_all[self._animation_name][frameIndex]['duration']
 
-        frameIndex = self._animatedIndex % len(self._named_animations[self._animationName])
-        frameDuration = self._named_animations[self._animationName][frameIndex]['duration']
         if pg.time.get_ticks() - self._lastAnimationChanged > frameDuration:
+            # Img
+            frameImage = self._animation_all[self._animation_name][frameIndex]['image']
+            self._set_image(frameImage)
 
-            frameImage = self._named_animations[self._animationName][frameIndex]['image']
-            self.image = frameImage
+            if frameIndex == len(self._animation_all[self._animation_name]) - 1:
+                self._animation_name = self._animation_default_name
 
-            if frameIndex == len(self._named_animations[self._animationName]) - 1:
-                self._animationName = self._animationIdleName
-
-            self._animatedIndex += 1
+            self._animated_index += 1
             self._lastAnimationChanged = pg.time.get_ticks()
-
 
         # Animation Moving
         move_delta_x = 0
@@ -159,9 +136,17 @@ class BaseGObject:
 
         self.rect = pg.Rect(self.x, self.y, self.image.get_width(),
                             self.image.get_height())
+    
+    def Draw(self, surface):
+        surface.blit(self.image, self.rect)
 
-    def wasClicked(self, event):
+    def Clicked(self, event):
         if self.rect.collidepoint(event.pos):
             return True
         else:
             return False
+
+    def _set_image(self, img):
+        self.image = img
+        self._original_image = self.image
+    
