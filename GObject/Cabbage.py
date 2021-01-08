@@ -15,7 +15,7 @@ class Cabbage(BaseGObject):
             {'path': 'media/cabbage/cabbage_1.png', 'duration': 200},
         ]
 
-        super(Cabbage, self).__init__(animated, 0.18, x, y)
+        super().__init__(animated, 0.18, x, y)
         self.SetMaxSpeed(10)
         self.AddAnimation(
             'eat_cabbage',

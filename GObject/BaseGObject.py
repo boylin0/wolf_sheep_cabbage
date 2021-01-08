@@ -3,9 +3,9 @@ import pygame as pg
 from Utils.Utils import clamp
 
 
-class BaseGObject:
+class BaseGObject(object):
     def __init__(self, animatedList, resizeRate, x, y):
-        pg.sprite.Sprite.__init__(self)
+        #pg.sprite.Sprite.__init__(self)
 
         # Set image size
         self._set_image(pg.image.load(animatedList[0]['path']))

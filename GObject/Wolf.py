@@ -17,7 +17,7 @@ class Wolf(BaseGObject):
             {'path': 'media/wolf/wolf_7.png', 'duration': 200}
         ]
 
-        super(Wolf, self).__init__(animated, 0.2, x, y)
+        super().__init__(animated, 0.2, x, y)
         self.SetMaxSpeed(10)
 
         self.AddAnimation(

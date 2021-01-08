@@ -13,4 +13,4 @@ class UIObject(BaseGObject):
             },
         ]
 
-        super(UIObject, self).__init__(animated, resizeRate, x, y)
+        super().__init__(animated, resizeRate, x, y)

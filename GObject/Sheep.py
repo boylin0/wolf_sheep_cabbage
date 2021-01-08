@@ -26,7 +26,7 @@ class Sheep(BaseGObject):
             {'path': 'media/sheep/sheep_2.png', 'duration': 100},
         ]
 
-        super(Sheep, self).__init__(animated, 0.125, x, y)
+        super().__init__(animated, 0.125, x, y)
         self.SetMaxSpeed(10)
         self.SetFlip(True, True)
 

@@ -22,7 +22,7 @@ class Boat(BaseGObject):
             {'path': 'media/boat/boat_swing_l_1.png', 'duration': 300},
         ]
 
-        super(Boat, self).__init__(animated, 0.5, x, y)
+        super().__init__(animated, 0.5, x, y)
 
         self.isMoving = False
         self.Carrying = None

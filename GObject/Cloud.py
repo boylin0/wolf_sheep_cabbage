@@ -22,7 +22,7 @@ class Cloud(BaseGObject):
             },
         ]
 
-        super(Cloud, self).__init__(animated, 0.2, 0, 0)
+        super().__init__(animated, 0.2, 0, 0)
         self.SetMaxSpeed(random.uniform(0.5, 1.0))
         self.loopWidth = width
         self.HeightStart = HeightStart

@@ -10,7 +10,7 @@ class Person(BaseGObject):
             {'path': 'media/person/person_0.png', 'duration': 200},
         ]
 
-        super(Person, self).__init__(animated, 0.2, x, y)
+        super().__init__(animated, 0.2, x, y)
 
         self.AddAnimation(
             'boat_shaking',
