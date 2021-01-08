@@ -13,6 +13,9 @@ Download the source code from the repository and execute the following command i
 $ python3 main.py
 ```
 
+## Screenshots
+![ScreenShot](https://raw.githubusercontent.com/boylin0/wolf_sheep_cabbage/master/screenshot.png)
+
 ### Reference
 
 * [pygame](https://www.pygame.org/docs/) - The PyGame Library.
